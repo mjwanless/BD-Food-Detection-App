@@ -2,8 +2,6 @@
 
 FridgeToFork is a web application that helps you discover recipes based on ingredients you already have. Simply take a photo of your ingredients, and the app will identify them using computer vision technology, then suggest recipes you can make.
 
-![FridgeToFork](https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80)
-
 ## Features
 
 -   📷 Capture ingredients using your webcam or upload an image
