@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FridgeToFork</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Poppins", "Segoe UI", "system-ui", "-apple-system", "sans-serif"],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body class="h-screen overflow-hidden">
+        <div id="app" class="h-full relative">
+            <!-- Screens are in order, for the most part. -->
+            <!-- Landing Screen -->
+            <div
+                id="landing-screen"
+                class="absolute inset-0 flex flex-col justify-center items-center p-8 bg-cover bg-center bg-no-repeat"
+                style="
+                    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)),
+                        url('https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80');
+                ">
+                <div class="text-5xl font-bold text-white mb-16">Fridge<span class="text-green-500">2</span>Fork</div>
+                <button
+                    id="start-button"
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold text-lg py-4 px-12 rounded-full shadow-lg transition-all duration-300 ease-in-out hover:translate-y-[-2px] hover:shadow-xl active:translate-y-[1px] active:shadow-md mb-16">
+                    Get Started
+                </button>
+
+                <!-- This is for style; it doesn't exist -->
+                <div class="text-white text-sm mt-4">Don't have an account? <span class="text-green-400 font-semibold">Sign up now</span></div>
+            </div>
+
+            <!-- Loading Screens; They don't get seen often, but they still look good -->
+            <div id="loading-detection" class="absolute inset-0 hidden bg-white flex flex-col justify-center items-center p-8">
+                <div class="w-16 h-16 border-4 border-green-200 border-t-green-500 rounded-full animate-spin mb-4"></div>
+                <p class="text-xl font-semibold text-gray-800">Detecting Ingredients</p>
+                <p class="text-gray-600 mt-2">Please wait while we analyze your image...</p>
+            </div>
+
+            <div id="loading-recipes" class="absolute inset-0 hidden bg-white flex flex-col justify-center items-center p-8">
+                <div class="w-16 h-16 border-4 border-green-200 border-t-green-500 rounded-full animate-spin mb-4"></div>
+                <p class="text-xl font-semibold text-gray-800">Finding Recipes</p>
+                <p class="text-gray-600 mt-2">Discovering delicious meals for you...</p>
+            </div>
+
+            <!-- Image Upload Screen/Webcam stuff -->
+            <div id="image-upload-container" class="absolute inset-0 hidden bg-white p-6 flex flex-col">
+                <div class="flex items-center justify-between mb-5">
+                    <h1 class="text-2xl font-bold text-gray-800">Upload Food Image</h1>
+                    <div class="text-sm text-gray-500">Step 1 of 3</div>
+                </div>
+
+                <p class="text-gray-600 mb-4">
+                    Upload a photo of your ingredients or take a picture with your camera to detect available ingredients
+                </p>
+
+                <!-- Input Options -->
+                <div class="flex gap-4 mb-4">
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" />
+                    <label
+                        for="image-upload"
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center cursor-pointer transition duration-300 ease-in-out">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Upload Image
+                    </label>
+                    <button
+                        id="webcam-toggle"
+                        class="flex-1 bg-white border border-green-500 text-green-500 hover:bg-green-50 font-medium py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 ease-in-out">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Use Camera
+                    </button>
+                </div>
+
+                <!-- Webcam Container -->
+                <div id="webcam-container" class="hidden">
+                    <div class="flex flex-col items-center mb-4 overflow-hidden">
+                        <div class="w-full rounded-lg overflow-hidden border border-gray-200 mb-2" style="max-height: 30vh">
+                            <video id="webcam" class="w-full h-full object-cover bg-gray-100" autoplay playsinline></video>
+                        </div>
+                        <button
+                            id="capture-button"
+                            class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition duration-300 ease-in-out">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Take Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Image Preview -->
+                <div
+                    id="image-preview-container"
+                    class="flex-1 mb-4 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
+                    <div class="text-center p-6">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="mx-auto h-12 w-12 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="mt-1 text-sm text-gray-500">No image selected</p>
+                    </div>
+                </div>
+                <button
+                    id="detect-button"
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-full shadow-md transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    Detect Ingredients
+                </button>
+
+                <div id="upload-status" class="mt-4 text-center text-sm text-gray-600"></div>
+            </div>
+
+            <!-- Results Selection Container -->
+            <div id="results-selection-container" class="absolute inset-0 hidden bg-white p-6 flex flex-col">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Detected Ingredients</h2>
+                    <div class="text-sm text-gray-500">Step 2 of 3</div>
+                </div>
+
+                <!-- Detected Ingredients List -->
+                <div id="ingredients-list" class="mb-6">
+                    <p class="text-gray-600">We'll display your detected ingredients here after analysis.</p>
+                </div>
+
+                <!-- This is for debugging; feel free to unhide it, if you're curious -->
+                <div id="detection-status" class="hidden"></div>
+
+                <!-- Recipe Search Form -->
+                <form id="recipe-search-form" class="hidden flex-1 flex flex-col">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-5">Customize Your Recipe Search</h3>
+
+                    <!-- Editable Ingredients -->
+                    <div class="form-section mb-6">
+                        <label class="block mb-2 font-medium text-gray-700">Ingredients:</label>
+                        <div id="editable-ingredients-container" class="flex flex-wrap gap-2 mb-3"></div>
+                        <button
+                            type="button"
+                            id="add-ingredient-btn"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Add Ingredient
+                        </button>
+                    </div>
+
+                    <!-- Cuisine Type -->
+                    <div class="form-section mb-6">
+                        <label for="cuisine-type" class="block mb-2 font-medium text-gray-700">Cuisine Type:</label>
+                        <select
+                            id="cuisine-type"
+                            name="cuisine"
+                            class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Any Cuisine</option>
+                            <option value="italian">Italian</option>
+                            <option value="mexican">Mexican</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="indian">Indian</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="thai">Thai</option>
+                            <option value="french">French</option>
+                            <option value="mediterranean">Mediterranean</option>
+                        </select>
+                    </div>
+
+                    <!-- Dietary Restrictions -->
+                    <div class="form-section mb-8">
+                        <label for="diet-restriction" class="block mb-2 font-medium text-gray-700">Dietary Restrictions:</label>
+                        <select
+                            id="diet-restriction"
+                            name="diet"
+                            class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">No Restrictions</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="gluten-free">Gluten-Free</option>
+                            <option value="ketogenic">Ketogenic</option>
+                            <option value="paleo">Paleo</option>
+                        </select>
+                    </div>
+
+                    <!-- Find Recipes Button -->
+                    <button
+                        type="submit"
+                        id="find-recipes-button"
+                        class="mt-auto bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center">
+                        Find Recipes
+                    </button>
+                </form>
+            </div>
+
+            <!-- Recipe Results Container -->
+            <div id="recipe-results-container" class="absolute inset-0 hidden bg-white p-6 flex flex-col">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Recipe Suggestions</h2>
+                    <div class="text-sm text-gray-500">Step 3 of 3</div>
+                </div>
+
+                <!-- Recipes List -->
+                <div id="recipes-list" class="flex-1 overflow-y-auto pr-2 mb-20">
+                    <p class="text-gray-600">Your recipe suggestions will appear here.</p>
+                </div>
+
+                <!-- Start Over Button -->
+                <button
+                    id="restart-button"
+                    class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out">
+                    Start Over
+                </button>
+            </div>
+        </div>
+
+        <script src="/static/script.js"></script>
+    </body>
+</html>
